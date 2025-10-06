@@ -1,0 +1,87 @@
+# Load the provided data.csv, inspect structure, and create several leadership-ready visuals.
+# We'll: (1) load the data, (2) show head, (3) basic profiling, (4) build key visuals: price over time,
+# price distribution by property type, geography-level summary, and price vs. density proxy (pp_sq_m).
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 1) Load
+csv_path = "data.csv"
+df = pd.read_csv(csv_path)
+
+# Parse dates and coerce numerics
+if 'Date of Transfer' in df.columns:
+    df['Date of Transfer'] = pd.to_datetime(df['Date of Transfer'], errors='coerce')
+
+num_cols = ['Area (sq km)', 'Price', 'pp_sq_m', 'est_pop']
+for c in num_cols:
+    if c in df.columns:
+        df[c] = pd.to_numeric(df[c], errors='coerce')
+
+# Create helper columns
+if 'Date of Transfer' in df.columns:
+    df['Year'] = df['Date of Transfer'].dt.year
+
+# Show head
+print(df.head())
+
+# 2) Visual 1: Median price over time
+if 'Year' in df.columns and 'Price' in df.columns:
+    yearly = df.groupby('Year', as_index=False)['Price'].median().sort_values('Year')
+    plt.figure(figsize=(8,4))
+    sns.lineplot(data=yearly, x='Year', y='Price', marker='o')
+    plt.title('Median Property Price by Year')
+    plt.tight_layout()
+    plt.show()
+
+# 3) Visual 2: Price distribution by property type
+if 'Property Type' in df.columns and 'Price' in df.columns:
+    plt.figure(figsize=(8,4))
+    order_types = df['Property Type'].value_counts().index.tolist()
+    sns.boxplot(data=df, x='Property Type', y='Price', order=order_types)
+    plt.title('Price Distribution by Property Type')
+    plt.tight_layout()
+    plt.show()
+
+# 4) Visual 3: Geography-level median prices (top 15)
+geo_col = 'Name' if 'Name' in df.columns else ('Geography' if 'Geography' in df.columns else None)
+if geo_col is not None and 'Price' in df.columns:
+    geo_med = df.groupby(geo_col, as_index=False)['Price'].median().sort_values('Price', ascending=False).head(15)
+    plt.figure(figsize=(8,5))
+    sns.barplot(data=geo_med, x='Price', y=geo_col, palette='Blues_r')
+    plt.title('Top 15 Geographies by Median Price')
+    plt.tight_layout()
+    plt.show()
+
+# 5) Visual 4: Price vs. price-per-sq-m (relationship)
+if 'pp_sq_m' in df.columns and 'Price' in df.columns:
+    sample_df = df[['Price','pp_sq_m']].dropna().sample(n=min(5000, len(df.dropna(subset=['Price','pp_sq_m']))), random_state=42) if len(df.dropna(subset=['Price','pp_sq_m'])) > 0 else df[['Price','pp_sq_m']].dropna()
+    if len(sample_df) > 0:
+        plt.figure(figsize=(6,5))
+        sns.scatterplot(data=sample_df, x='pp_sq_m', y='Price', alpha=0.4, s=20)
+        sns.regplot(data=sample_df, x='pp_sq_m', y='Price', scatter=False, color='red')
+        plt.title('Price vs. Price per sq m')
+        plt.tight_layout()
+        plt.show()
+
+# 6) Visual 5: Price per sq m by property type
+if 'pp_sq_m' in df.columns and 'Property Type' in df.columns:
+    plt.figure(figsize=(8,4))
+    order_types_pp = df['Property Type'].value_counts().index.tolist()
+    sns.boxplot(data=df, x='Property Type', y='pp_sq_m', order=order_types_pp)
+    plt.title('Price per sq m by Property Type')
+    plt.tight_layout()
+    plt.show()
+
+# 7) Visual 6: Price trend by property type over time (median)
+if 'Year' in df.columns and 'Property Type' in df.columns and 'Price' in df.columns:
+    trend = df.groupby(['Year','Property Type'], as_index=False)['Price'].median().sort_values('Year')
+    plt.figure(figsize=(9,5))
+    sns.lineplot(data=trend, x='Year', y='Price', hue='Property Type', marker='o')
+    plt.title('Median Price by Year and Property Type')
+    plt.tight_layout()
+    plt.show()
+
+print('Loaded data and generated visuals')
