@@ -1,0 +1,111 @@
+1. Check for Missing Values (NULLs)
+
+Before cleaning, it's essential to identify columns with missing values. This query will count NULL values in each column.
+
+SELECT 
+    COLUMN_NAME,
+    COUNT(*) - COUNT(COLUMN_NAME) AS missing_values
+FROM real_estate_data
+GROUP BY COLUMN_NAME;
+
+
+2. Remove Rows with Missing Price Values
+
+If the "price" column has NULL values, those rows can be removed to ensure data integrity for analysis.
+
+DELETE FROM 
+    real_estate_data
+WHERE 
+    price IS NULL;
+
+
+3. Replace Missing Values with Default Values
+
+For non-essential columns, you may want to replace missing values with a default or calculated value, like "Unknown" for categorical columns.
+
+UPDATE 
+    real_estate_data
+SET 
+    city = 'Unknown'
+WHERE 
+    city IS NULL;
+
+
+4. Remove Duplicate Entries
+
+It's important to remove any duplicate rows to ensure that the analysis is based on unique records.
+
+DELETE FROM 
+    real_estate_data
+WHERE 
+    rowid NOT IN (
+        SELECT MIN(rowid)
+        FROM real_estate_data
+        GROUP BY property_id, date_of_sale
+    );
+
+
+5. Standardize Categorical Variables
+
+Sometimes data might have inconsistent entries (e.g., different formats for the same category). You can standardize the "property_type" column.
+
+UPDATE 
+    real_estate_data
+SET 
+    property_type = 'Detached House'
+WHERE 
+    property_type = 'Det House';
+
+
+6. Remove Outliers Based on Price
+
+Sometimes, extreme outliers can skew analysis. You might want to remove rows where the price is extremely high or low based on some threshold.
+
+DELETE FROM 
+    real_estate_data
+WHERE 
+    price > 10000000 OR price < 50000;
+
+7. Check for Negative Values (e.g., square meters)
+
+Negative values in numerical columns like square_meters are likely errors, so you might want to flag or remove them.
+
+DELETE FROM 
+    real_estate_data
+WHERE 
+    square_meters < 0;
+
+
+8. Format Date Column Consistency
+
+Ensure all date values are in a consistent format (e.g., YYYY-MM-DD). For rows with an inconsistent format, we could standardize them.
+
+UPDATE 
+    real_estate_data
+SET 
+    date_of_sale = STRFTIME('%Y-%m-%d', date_of_sale)
+WHERE 
+    date_of_sale IS NOT NULL;
+
+
+9. Check for Consistent Data Types
+
+To ensure data integrity, it’s a good idea to check that columns that should contain numeric values, such as price or square_meters, are free from non-numeric values.
+
+SELECT 
+    *
+FROM 
+    real_estate_data
+WHERE 
+    price NOT LIKE '%[^0-9.]%' OR
+    square_meters NOT LIKE '%[^0-9.]%';
+
+
+10. Handling Negative Prices
+
+Negative prices are a clear indication of errors in the dataset. The following query removes such rows:
+
+DELETE FROM 
+    real_estate_data
+WHERE 
+    price < 0;
