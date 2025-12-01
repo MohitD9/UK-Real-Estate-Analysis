@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project focuses on analyzing the UK real estate market from 2001 to 2017, using SQL for data extraction and cleaning, followed by visualizations created in Power BI. The goal of this analysis is to uncover key insights into property price trends, regional disparities, and how various factors such as property type and location impact pricing. 
+This project focuses on analyzing the UK real estate market from 2001 to 2017, using SQL for data extraction and cleaning, followed by visualizations created in Tableau. The goal of this analysis is to uncover key insights into property price trends, regional disparities, and how various factors such as property type and location impact pricing. 
 
 ### Key Insights:
 - **Price Trends**: The dataset reveals how the UK property market evolved over the years, with median prices for different property types and cities.
@@ -11,8 +11,8 @@ This project focuses on analyzing the UK real estate market from 2001 to 2017, u
 
 ## Technologies Used
 - **SQL**: Used for data extraction, transformation, and cleaning, including removing duplicates, handling missing values, and normalizing data.
-- **Power BI**: Utilized for creating interactive dashboards and visualizations, showcasing price trends, property type distributions, and regional price variations.
-- **Python**: For handling specific data processing tasks (if applicable).
+- **Tableau**: Utilized for creating interactive dashboards and visualizations, showcasing price trends, property type distributions, and regional price variations.
+- **Python**: For handling specific data processing tasks.
   
 ## Dataset Information
 
